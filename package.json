@@ -1,0 +1,9 @@
+{
+  "name": "vom-bot",
+  "version": "0.1.0",
+  "description": "Maximize your slack reaction potential",
+  "scripts" : {
+    "test": "echo \"No tests yet...\""
+  },
+  "author": "Thomas Tuttle"
+}
