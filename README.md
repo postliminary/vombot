@@ -13,3 +13,8 @@ Install and setup the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/ins
 `func start` Runs a locally hosted function instance
 
 `func azure functionapp publish [AppName]` Publishes to azure
+
+## TODOs
+
+* oauth flow callback
+* access token storage

@@ -2,8 +2,12 @@
   "name": "vom-bot",
   "version": "0.1.0",
   "description": "Maximize your slack reaction potential",
-  "scripts" : {
+  "scripts": {
     "test": "echo \"No tests yet...\""
   },
-  "author": "Thomas Tuttle"
+  "author": "Thomas Tuttle",
+  "dependencies": {
+    "node-fetch": "^2.6.0",
+    "query-string": "^6.8.3"
+  }
 }
