@@ -1,7 +1,10 @@
 const log = require('../utils/log').logger;
 const getUser = require('../repositories/getUser').bySlackId;
+const getRandomEmojis = require('../repositories/getRandomEmojis');
 const getMessages = require('../slack/getMessages');
 const addReaction = require('../slack/addReaction');
+
+const MaxReactionsPerMessage = 23;
 
 module.exports = async function(command) {
     // TODO Clean this payload searching up
@@ -27,12 +30,22 @@ module.exports = async function(command) {
         // TODO Attempt to post message here
     }
 
-    // TODO Get list of emojis
-    const added = await addReaction({
-        name: 'thumbsup',
-        channel: command.payload.channel_id,
-        timestamp: message.ts,
-    }, user.slackAccessToken);
+    const emojis = await getRandomEmojis(null, MaxReactionsPerMessage);
+    let added = 0;
+    for (let i = 0; i < emojis.length; i++) {
+        const emoji = emojis[i];
+        const success = await addReaction({
+            name: emoji.code,
+            channel: command.payload.channel_id,
+            timestamp: message.ts,
+        }, user.slackAccessToken);
+        if (success) {
+            added++;
+        }
+    }
+    log('Added reactions', added);
 
-    // TODO Save user activity
+    if (added) {
+        // TODO Save user activity
+    }
 };
