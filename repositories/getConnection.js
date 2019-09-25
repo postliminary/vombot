@@ -1,7 +1,7 @@
 const Connection = require('tedious').Connection;
 const log = require('../utils/log').logger;
 
-module.exports = function() {
+module.exports = async function() {
     return new Promise((resolve, reject) => {
         const config = {
             server: process.env['VOMBOT_SQL_SERVER'],

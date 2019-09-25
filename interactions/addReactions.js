@@ -33,4 +33,6 @@ module.exports = async function(command) {
         channel: command.payload.channel_id,
         timestamp: message.ts,
     }, user.slackAccessToken);
+
+    // TODO Save user activity
 };

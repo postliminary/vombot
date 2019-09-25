@@ -11,4 +11,6 @@ module.exports = async function(context, message) {
     if (message.type === CommandType.LastUserMessage) {
         await addReactions(message);
     }
+
+    context.done();
 };
