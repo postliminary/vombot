@@ -11,7 +11,7 @@ const validRequest = require('../slack/validRequest');
 module.exports = async function(context, req) {
     setLog(context.log);
 
-    log('Processing slash command.');
+    log('Responding to slash command.');
 
     if (!validRequest(req)) {
         context.res = JsonResult({
@@ -21,21 +21,17 @@ module.exports = async function(context, req) {
     }
 
     const command = parseCommand(req);
+    log(command);
     switch (command.type) {
         case CommandType.Connect:
             context.res = await promptUserConnect(command);
-            break;
-        case CommandType.Message:
-            context.res = JsonResult({
-                text: 'Voming on message...'
-            });
-            // Push to queue
             break;
         case CommandType.LastUserMessage:
             context.res = JsonResult({
                 text: 'Voming on user...'
             });
             // Push to queue
+            context.bindings.queue = command;
             break;
         default:
             context.res = helpUser();
@@ -116,27 +112,27 @@ function parseCommand(req) {
 
     const payload = queryString.parse(req.body);
     const tokens = payload.text
-        .toLowerCase()
         .split(/\s+/);
 
     let type = 'help';
-    let user = null;
+    let target = null;
     let limit = null;
 
-    if (tokens.length === 1 && tokens[0] === 'connect') {
+    // TODO Make this better
+    if (tokens.length === 1 && tokens[0].toLowerCase() === 'connect') {
         type = CommandType.Connect;
-    } else if (tokens.length > 1 && tokens[0] === 'message') {
-        type = CommandType.Message;
-        limit = tokens[1] && tryParseLimit(tokens[1]);
-    } else if (tokens.length > 1 && (user = tryParseUser(tokens[0]))) {
+    } else if (tokens.length > 0 && (target = tryParseUser(tokens[0]))) {
         type = CommandType.LastUserMessage;
         limit = tokens[1] && tryParseLimit(tokens[1]);
     }
 
+    // TODO Add command args
     return {
         type,
-        user,
-        limit,
+        args: {
+            target,
+            limit,
+        },
         payload,
         tokens,
     };

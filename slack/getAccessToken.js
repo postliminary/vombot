@@ -21,7 +21,6 @@ module.exports = async function(code) {
             }
         });
         const data = await response.json();
-        log(data);
         return data.access_token;
     }
     catch (error) {
