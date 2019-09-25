@@ -1,28 +1,45 @@
 const fetch = require('node-fetch');
 const queryString = require('query-string');
+const CommandType = require('../constants/commandType');
+const log = require('../utils/log').logger;
+const setLog = require('../utils/log').set;
+const JsonResult = require('../utils/JsonResult');
+const promptUserConnect = require('../interactions/promptUserConnect');
+const helpUser = require('../interactions/helpUser');
+const validRequest = require('../slack/validRequest');
 
-let log = () => {};
-
-module.exports = async function (context, req) {
-    log = context.log;
+module.exports = async function(context, req) {
+    setLog(context.log);
 
     log('Processing slash command.');
 
-    const message = await processCommand(context, req);
+    if (!validRequest(req)) {
+        context.res = JsonResult({
+            text: "Invalid request."
+        });
+        return;
+    }
 
-    context.res = {
-        status: 200,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: {
-            ...message,
-            'response_type': 'ephemeral',
-            'attachments': [
-                { 'text': req.body.text }
-            ]
-        }
-    };
+    const command = parseCommand(req);
+    switch (command.type) {
+        case CommandType.Connect:
+            context.res = await promptUserConnect(command);
+            break;
+        case CommandType.Message:
+            context.res = JsonResult({
+                text: 'Voming on message...'
+            });
+            // Push to queue
+            break;
+        case CommandType.LastUserMessage:
+            context.res = JsonResult({
+                text: 'Voming on user...'
+            });
+            // Push to queue
+            break;
+        default:
+            context.res = helpUser();
+    }
 };
 
 async function processCommand(context, req) {
@@ -94,33 +111,38 @@ async function processCommand(context, req) {
     }
 }
 
-function parseCommand(text) {
-    const tokens = text.split(/\s+/);
-    log('Got tokens', tokens);
+function parseCommand(req) {
+    log('Parsing command');
 
-    return tokens.reduce((params, token) => {
-        // Subject
-        if (!params.subject) {
-            const subject = tryParseSubject(token);
-            if (subject)
-                return {...params, subject};
-        }
+    const payload = queryString.parse(req.body);
+    const tokens = payload.text
+        .toLowerCase()
+        .split(/\s+/);
 
-        // Limit
-        if (!params.limit) {
-            const limit = tryParseLimit(token);
-            if (limit)
-                return {...params, limit};
-        }
+    let type = 'help';
+    let user = null;
+    let limit = null;
 
-        return params;
-    }, {
-        subject: null,
-        limit: null,
-    });
+    if (tokens.length === 1 && tokens[0] === 'connect') {
+        type = CommandType.Connect;
+    } else if (tokens.length > 1 && tokens[0] === 'message') {
+        type = CommandType.Message;
+        limit = tokens[1] && tryParseLimit(tokens[1]);
+    } else if (tokens.length > 1 && (user = tryParseUser(tokens[0]))) {
+        type = CommandType.LastUserMessage;
+        limit = tokens[1] && tryParseLimit(tokens[1]);
+    }
+
+    return {
+        type,
+        user,
+        limit,
+        payload,
+        tokens,
+    };
 }
 
-function tryParseSubject(token) {
+function tryParseUser(token) {
     const match = token.match(/<@([a-z0-9]+)(\|.*?)?>/i);
     return match && match[1];
 }

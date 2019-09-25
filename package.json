@@ -1,6 +1,6 @@
 {
   "name": "vom-bot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Maximize your slack reaction potential",
   "scripts": {
     "test": "echo \"No tests yet...\""
@@ -8,6 +8,7 @@
   "author": "Thomas Tuttle",
   "dependencies": {
     "node-fetch": "^2.6.0",
-    "query-string": "^6.8.3"
+    "query-string": "^6.8.3",
+    "tedious": "^6.4.0"
   }
 }
