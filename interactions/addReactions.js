@@ -24,7 +24,7 @@ module.exports = async function(command) {
     }
 
     const targetMarker = `<@${command.args.target}>`;
-    const message = messages.find(m => m.user === command.args.target || m.text.includes(targetMarker));
+    const message = messages && messages.find(m => m.user === command.args.target || m.text.includes(targetMarker));
     if (!message) {
         log('Could not find a message for the user');
         // TODO Attempt to post message here

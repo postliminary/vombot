@@ -1,6 +1,6 @@
 const queryString = require('querystring');
 
-const scope = 'channels:history emoji:read reactions:write';
+const scope = 'identity commands channels:history emoji:read reactions:write';
 
 module.exports = function(team, nonce) {
     const query = {
